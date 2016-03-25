@@ -261,15 +261,9 @@ int runRepl()
 
   char line[MAX_LINE_LENGTH];
 
-  for (;;)
+  while (linenoiseRaw(line, MAX_LINE_LENGTH, "> ") != -1)
   {
-    printf("> ");
-
-    if (!fgets(line, MAX_LINE_LENGTH, stdin))
-    {
-      printf("\n");
-      break;
-    }
+    if (line[0] != '\0') linenoiseHistoryAdd(line);
 
     // TODO: Handle failure.
     wrenInterpret(vm, line);

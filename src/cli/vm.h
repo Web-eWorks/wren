@@ -2,6 +2,7 @@
 #define vm_h
 
 #include "uv.h"
+#include "linenoise.h"
 #include "wren.h"
 
 // Executes the Wren script at [path] in a new VM.

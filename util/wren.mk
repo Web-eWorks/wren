@@ -122,10 +122,13 @@ TEST_OBJECTS   := $(patsubst test/api/%.c, $(BUILD_DIR)/test/%.o, $(TEST_SOURCES
 LIBUV_DIR := deps/libuv
 LIBUV     := build/libuv$(LIBUV_ARCH).a
 
+LINENOISE_DIR := deps/linenoise
+LINENOISE     := deps/linenoise/liblinenoise.a
+
 # Flags needed to compile source files for the CLI, including the modules and
 # API tests.
 CLI_FLAGS := -D_XOPEN_SOURCE=600 -Isrc/include -I$(LIBUV_DIR)/include \
-             -Isrc/cli -Isrc/module
+             -Isrc/cli -Isrc/module -I$(LINENOISE_DIR)
 
 # Targets ---------------------------------------------------------------------
 
@@ -149,7 +152,7 @@ test: $(BUILD_DIR)/test/$(WREN)
 
 # Command-line interpreter.
 bin/$(WREN): $(OPT_OBJECTS) $(CLI_OBJECTS) $(MODULE_OBJECTS) $(VM_OBJECTS) \
-		$(LIBUV)
+		$(LIBUV) $(LINENOISE)
 	@ printf "%10s %-30s %s\n" $(CC) $@ "$(C_OPTIONS)"
 	@ mkdir -p bin
 	@ $(CC) $(CFLAGS) $^ -o $@ -lm $(LIBUV_LIBS)
@@ -168,7 +171,8 @@ lib/lib$(WREN).$(SHARED_EXT): $(OPT_OBJECTS) $(VM_OBJECTS)
 
 # Test executable.
 $(BUILD_DIR)/test/$(WREN): $(OPT_OBJECTS) $(MODULE_OBJECTS) $(TEST_OBJECTS) \
-		$(VM_OBJECTS) $(BUILD_DIR)/cli/modules.o $(BUILD_DIR)/cli/vm.o $(LIBUV)
+	$(VM_OBJECTS) $(BUILD_DIR)/cli/modules.o $(BUILD_DIR)/cli/vm.o $(LIBUV) \
+	$(LINENOISE)
 	@ printf "%10s %-30s %s\n" $(CC) $@ "$(C_OPTIONS)"
 	@ mkdir -p $(BUILD_DIR)/test
 	@ $(CC) $(CFLAGS) $^ -o $@ -lm $(LIBUV_LIBS)
@@ -213,6 +217,11 @@ $(LIBUV_DIR)/build/gyp/gyp: util/libuv.py
 # Build libuv to a static library.
 $(LIBUV): $(LIBUV_DIR)/build/gyp/gyp util/libuv.py
 	@ ./util/libuv.py build $(LIBUV_ARCH)
+
+#Build linenoise to a static library
+$(LINENOISE): $(LINENOISE_DIR)/linenoise.c $(LINENOISE_DIR)/linenoise.h
+	 $(CC) -c -o $(LINENOISE_DIR)/linenoise.o $< -Werror -O3 -I$(LINENOISE_DIR)
+	 ar rcu $(LINENOISE) $(LINENOISE_DIR)/linenoise.o
 
 # Wren modules that get compiled into the binary as C strings.
 src/optional/wren_opt_%.wren.inc: src/optional/wren_opt_%.wren util/wren_to_c_string.py
