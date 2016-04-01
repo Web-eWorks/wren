@@ -1,0 +1,38 @@
+From 1f214fe309d76ef1d382362a14301837a20bc64d Mon Sep 17 00:00:00 2001
+From: Webster Sheets <info@web-eworks.com>
+Date: Fri, 1 Apr 2016 16:46:55 -0400
+Subject: [PATCH] Expose linenoiseRaw
+
+---
+ linenoise.c | 2 +-
+ linenoise.h | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/linenoise.c b/linenoise.c
+index c10557d..3a60372 100644
+--- a/linenoise.c
++++ b/linenoise.c
+@@ -929,7 +929,7 @@ void linenoisePrintKeyCodes(void) {
+ 
+ /* This function calls the line editing function linenoiseEdit() using
+  * the STDIN file descriptor set in raw mode. */
+-static int linenoiseRaw(char *buf, size_t buflen, const char *prompt) {
++int linenoiseRaw(char *buf, size_t buflen, const char *prompt) {
+     int count;
+ 
+     if (buflen == 0) {
+diff --git a/linenoise.h b/linenoise.h
+index fbb01cf..c5ea02a 100644
+--- a/linenoise.h
++++ b/linenoise.h
+@@ -49,6 +49,7 @@ typedef struct linenoiseCompletions {
+ } linenoiseCompletions;
+ 
+ typedef void(linenoiseCompletionCallback)(const char *, linenoiseCompletions *);
++int linenoiseRaw(char *buf, size_t buflen, const char *prompt);
+ void linenoiseSetCompletionCallback(linenoiseCompletionCallback *);
+ void linenoiseAddCompletion(linenoiseCompletions *, const char *);
+ 
+-- 
+2.7.3
+

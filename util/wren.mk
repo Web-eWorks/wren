@@ -179,7 +179,7 @@ $(BUILD_DIR)/test/$(WREN): $(OPT_OBJECTS) $(MODULE_OBJECTS) $(TEST_OBJECTS) \
 
 # CLI object files.
 $(BUILD_DIR)/cli/%.o: src/cli/%.c $(CLI_HEADERS) $(MODULE_HEADERS) \
-		$(VM_HEADERS) $(LIBUV)
+		$(VM_HEADERS) $(LIBUV) $(LINENOISE)
 	@ printf "%10s %-30s %s\n" $(CC) $< "$(C_OPTIONS)"
 	@ mkdir -p $(BUILD_DIR)/cli
 	@ $(CC) -c $(CFLAGS) $(CLI_FLAGS) -o $@ $(FILE_FLAG) $<
@@ -218,10 +218,14 @@ $(LIBUV_DIR)/build/gyp/gyp: util/libuv.py
 $(LIBUV): $(LIBUV_DIR)/build/gyp/gyp util/libuv.py
 	@ ./util/libuv.py build $(LIBUV_ARCH)
 
+# Download linenoise.
+$(LINENOISE_DIR): util/linenoise.py
+	@ ./util/linenoise.py download
+
 #Build linenoise to a static library
-$(LINENOISE): $(LINENOISE_DIR)/linenoise.c $(LINENOISE_DIR)/linenoise.h
-	 $(CC) -c -o $(LINENOISE_DIR)/linenoise.o $< -Werror -O3 -I$(LINENOISE_DIR)
-	 ar rcu $(LINENOISE) $(LINENOISE_DIR)/linenoise.o
+$(LINENOISE): $(LINENOISE_DIR)
+	@ $(CC) -c $(CFLAGS:-std%=) -o $(LINENOISE_DIR)/linenoise.o $(LINENOISE_DIR)/linenoise.c -I$(LINENOISE_DIR)
+	@ ar rcu $(LINENOISE) $(LINENOISE_DIR)/linenoise.o
 
 # Wren modules that get compiled into the binary as C strings.
 src/optional/wren_opt_%.wren.inc: src/optional/wren_opt_%.wren util/wren_to_c_string.py
